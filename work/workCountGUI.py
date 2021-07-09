@@ -51,7 +51,7 @@ class Application(Frame):
 
 app = Application()
 # 设置窗口标题:
-app.master.title('查找速卖通直播间')
+app.master.title('查找速卖通直播间（直播过）')
 app.master.geometry('400x400')
 # logo = PhotoImage(file='E:/pythonProject/work/Ironman.gif')
 # Label(app.master,compound=CENTER,image=logo).pack(side="left")

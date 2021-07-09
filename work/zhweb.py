@@ -143,6 +143,7 @@ class Zhweb:
 
                     # if mylist[i].status<18:
                     #     writelist.append(mylist[i])
+                    # 获取直播过的状态
                     if mylist[i].status==18:
                         writelist.append(mylist[i])
 
