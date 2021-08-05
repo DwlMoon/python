@@ -1,7 +1,7 @@
 block_cipher = None
 
-a = Analysis(['work/workCountGUI.py'],
-             pathex=['E:/pythonProject'],
+a = Analysis(['lili/workInterfaceGUI.py'],
+             pathex=['D:/dwl/python/pythonProject'],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -45,10 +45,10 @@ exe = EXE(pyz,
           a.datas,
           [],
           exclude_binaries=False,
-          name='AliTool',
+          name='login',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           console=True,
-          icon='E:/pythonProject/work/123.ico')
+          icon='D:/dwl/python/pythonProject/123.ico')

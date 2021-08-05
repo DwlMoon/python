@@ -1,4 +1,5 @@
 import os
+import threading
 import time
 import traceback
 from tkinter import *
@@ -35,11 +36,19 @@ class Application(Frame):
                 print("获取的账号为:%s"% acount)
                 print("获取的密码为:%s"% password)
                 result=zhweb.Zhweb.write_file(zhweb.Zhweb,acount,password,[],None)
+
+                t = threading.Thread(target=zhweb.Zhweb.write_file, args=(zhweb.Zhweb,acount,password,[],None))
+                # 守护线程
+                t.setDaemon(True)
+                # 启动线程
+                t.start()
+
+
                 # result=zhweb.Zhweb.loginWeb(zhweb.Zhweb,acount,password)
-                if 'success' is result:
-                    messagebox.showinfo('Message', '您输入的账号： %s 直播间查找成功 !' % acount)
-                elif "fail" is result:
-                    messagebox.showinfo('Message', '您输入的账号： %s 直播间查找失败 !' % acount)
+                # if 'success' is result:
+                #     messagebox.showinfo('Message', '您输入的账号： %s 直播间查找成功 !' % acount)
+                # elif "fail" is result:
+                #     messagebox.showinfo('Message', '您输入的账号： %s 直播间查找失败 !' % acount)
 
     except Exception as e:
         print("====================异常信息=============================")
