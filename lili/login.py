@@ -9,6 +9,8 @@ import xlwt
 from openpyxl import Workbook
 from selenium import webdriver
 import time
+
+from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.select import Select
 import openpyxl
@@ -24,6 +26,9 @@ class login:
 
     # 登录页面
     def loginWebOne(self, ac,school,professional):
+
+        ac = ('15083059097','znzd@123456')
+
 
         print("账号 %s 登陆开始===================================================》" % ac[0])
 
@@ -49,8 +54,6 @@ class login:
 
         url = "http://jinanzyk.36ve.com/login/login"
 
-        # ac = "15083059097"
-        # password = 'znzd@123456'
 
 
         # 打开一个浏览器窗口
@@ -77,18 +80,23 @@ class login:
 
             if nowurl == url:
                 print("账号 %s 登陆失败" % ac[0])
-                errorAccount = driver.find_element_by_xpath('//*[@id="login-form-1"]/div[1]/div[2]/div[2]/p')
-                if errorAccount.is_displayed():
+                result_login=login.isElementPresent(self,driver,'xpath','//*[@id="login-form-1"]/div[1]/div[2]/div[2]/p')
+
+                if result_login:
                     login.writeExcel(self,ac[0])
+                    time.sleep(10)
+                    driver.delete_all_cookies()
+                    driver.quit()
 
             else:
                 print("账号 %s 登陆成功" % ac[0])
-
                 time.sleep(2)
 
-                a = driver.find_element_by_xpath('/html/body/div[4]/div/div/div/div[2]/a')
-                if a.is_displayed():
-                    a.click()
+                edit=login.isElementPresent(self,driver,'xpath','/html/body/div[4]/div/div/div/div[2]/a')
+                print(edit)
+
+                if edit:
+                    driver.find_element_by_xpath('/html/body/div[4]/div/div/div/div[2]/a').click()
 
                     time.sleep(3)
                     driver.find_element_by_id("edit_info").click()
@@ -188,8 +196,41 @@ class login:
                         time.sleep(2)
 
                         driver.find_element_by_xpath('//*[@id="form-1"]/div[20]/button').click()
+                        time.sleep(3)
+
 
                     print("账号 %s 登陆结束*****************************************" % ac[0])
+
+                time.sleep(3)
+
+                a='http://jinanzyk.36ve.com/ResourceCenter/resource/project-resource-list?projectId=890&page='+str(random.randint(1,500))+'&per-page=15&_pjax=%23new_html&_pjax=%23new_html'
+                driver.get(a)
+                time.sleep(3)
+
+                urls = driver.find_elements_by_xpath("//a")
+
+                useSourceList=[]
+                for url in urls:
+                    if not (url.get_attribute("date-resource-id") is None):
+                        useSourceList.append(url.get_attribute("date-resource-id"))
+                    # print(url.get_attribute("date-resource-id"))
+
+                print(useSourceList)
+
+                course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id='+random.choice(useSourceList)
+
+                js = 'window.open("{}");'.format(course)
+
+                driver.execute_script(js)
+                time.sleep(5)
+
+                # search_window = driver.current_window_handle
+                driver.switch_to.window(driver.window_handles[-1])
+
+                video=login.isElementPresent(self,driver,'xpath','//*[@id="video"]/div/div[9]/canvas')
+                if video:
+                    driver.find_element_by_xpath('//*[@id="video"]/div/div[9]/canvas').click()
+
 
         except Exception as e:
             print("======================%s 账号异常信息===============================" % ac[0])
@@ -201,8 +242,24 @@ class login:
             driver.quit()
 
 
+    """
+    用来判断元素标签是否存在，
+    """
+    def isElementPresent(self,driver, by, value):
+        try:
+            element = driver.find_element(by=by, value=value)
+        # 原文是except NoSuchElementException, e:
+        except NoSuchElementException as e:
+            # 发生了NoSuchElementException异常，说明页面中未找到该元素，返回False
+            return False
+        else:
+            # 没有发生异常，表示在页面中找到了该元素，返回True
+            return True
+
+
+
     def chooseAddress(self):
-        address=["山东","河南","上海","北京","江苏","浙江","福建","广东","广西","四川","云南","贵州","重启","甘肃","山西","陕西"]
+        address=["山东","河南","河北","上海","北京","江苏","浙江","福建","广东","广西","四川","云南","贵州","重启","甘肃","山西","陕西"]
         return random.choice(address)
 
 
@@ -229,8 +286,8 @@ class login:
             # print("第%s行第一列的值为: %s" % (l, account))
             # need=(account,pwd)
 
-            # password = 'znzd@123456'
-            password = 'znzd@12'
+            password = 'znzd@123456'
+            # password = 'znzd@12'
             need=(account,password)
             countList.append(need)
 
@@ -334,8 +391,8 @@ if __name__ == '__main__':
     # json=requests.get("http://127.0.0.1:5000/get/").json()['proxy']
     # print(json)
 
-    login.writeExcel(login,'4','3')
-
+    # login.writeExcel(login,'4','3')
+    login.loginWebOne(login,None,None,None)
 
 
 
