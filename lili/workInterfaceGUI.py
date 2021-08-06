@@ -30,6 +30,7 @@ class Application(Frame):
         def hello(self):
 
                 myExcel = self.myExcel.get()
+                # myExcel = 'D:\lili.xlsx'
                 school = self.school.get()
                 professional = self.professional.get()
 

@@ -1,19 +1,22 @@
-import _thread
 import os
 import random
 import threading
-
-import requests
+import traceback
+from copy import copy
+import datetime
 import xlrd
+import xlwt
+from openpyxl import Workbook
 from selenium import webdriver
 import time
-from selenium.webdriver.common.keys import Keys
-
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.select import Select
+import openpyxl
 
 
 class login:
+
+    lock=threading.Lock()
 
     # 均分数组
     def list_split(self, n):
@@ -24,9 +27,6 @@ class login:
 
         print("账号 %s 登陆开始===================================================》" % ac[0])
 
-        # 定义chromedriver驱动的位置
-        # 台式路径
-        # chromedriver = r"C:\Program Files (x86)\Google\Chrome\Application\chromedriver.exe"
 
         # 笔记本路径
         root_path = os.path.abspath(os.path.dirname(__file__)).split('lili')[0]
@@ -50,7 +50,6 @@ class login:
         url = "http://jinanzyk.36ve.com/login/login"
 
         # ac = "15083059097"
-
         # password = 'znzd@123456'
 
 
@@ -78,6 +77,9 @@ class login:
 
             if nowurl == url:
                 print("账号 %s 登陆失败" % ac[0])
+                errorAccount = driver.find_element_by_xpath('//*[@id="login-form-1"]/div[1]/div[2]/div[2]/p')
+                if errorAccount.is_displayed():
+                    login.writeExcel(self,ac[0])
 
             else:
                 print("账号 %s 登陆成功" % ac[0])
@@ -194,7 +196,7 @@ class login:
             print(e)
             pass
         finally:
-            time.sleep(30)
+            time.sleep(random.randint(300,480))
             driver.delete_all_cookies()
             driver.quit()
 
@@ -202,6 +204,7 @@ class login:
     def chooseAddress(self):
         address=["山东","河南","上海","北京","江苏","浙江","福建","广东","广西","四川","云南","贵州","重启","甘肃","山西","陕西"]
         return random.choice(address)
+
 
 
     # 读数据
@@ -222,9 +225,13 @@ class login:
 
         for l in range(1, line):
             account = str(table.cell(l, 0).value)
-            pwd = str(table.cell(l, 1).value)
+            # pwd = str(table.cell(l, 1).value)
             # print("第%s行第一列的值为: %s" % (l, account))
-            need=(account,pwd)
+            # need=(account,pwd)
+
+            # password = 'znzd@123456'
+            password = 'znzd@12'
+            need=(account,password)
             countList.append(need)
 
         list2 = login.list_split(countList, 5)
@@ -233,14 +240,66 @@ class login:
 
         for i in list2:
             for ac in i:
-                print("编号 : %s , 账号 : %s" % (count, ac))
+
+                print("编号 : %s , 账号 : %s" % (count, ac[0]))
 
                 mthread = threading.Thread(target=login.loginWebOne, args=(login, ac,school,professional))
                 # 启动刚刚创建的线程
                 mthread.start()
                 count = count + 1
 
-            time.sleep(60)
+            time.sleep(random.randint(500,600))
+
+
+
+
+
+    def writeExcel(self,account):
+
+        self.lock.acquire()
+
+        try:
+            base_path = r"D:\\"
+            use_time = datetime.datetime.now().strftime('%Y-%m-%d')
+
+            a = ['lili-' + use_time, ".xlsx"]
+
+            filename = "".join(a)
+            print(filename)
+            sChildPath = os.path.join(base_path, filename)
+            print("文件路径为 : %s " % sChildPath)
+
+            # 判断文件是否存在
+            if not os.path.exists(sChildPath):
+                # 创建一个workbook 设置编码
+                workbook = openpyxl.Workbook()
+                worksheet = workbook.get_sheet_by_name('Sheet')
+                worksheet.cell(1, 1).value = '账号'
+                worksheet.cell(1, 2).value = '时间'
+                workbook.save(sChildPath)
+
+            data = openpyxl.load_workbook(sChildPath)
+
+            # 取第一张表
+            sheetnames = data.get_sheet_names()
+            table = data.get_sheet_by_name(sheetnames[0])
+            # table = data.active
+            print(table.title)  # 输出表名
+            nrows = table.max_row  # 获得行数
+            ncolumns = table.max_column  # 获得行数
+
+            table.cell(nrows + 1, 1).value = account
+            table.cell(nrows + 1, 2).value = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+            data.save(sChildPath)
+
+        except Exception as e:
+            print("====================异常信息=============================")
+            print(traceback.format_exc())
+
+        finally:
+            self.lock.release()
+
 
 
 
@@ -248,8 +307,8 @@ class login:
 
 if __name__ == '__main__':
 
-    root_path = os.path.abspath(os.path.dirname(__file__)).split('lili')[0]
-    print(root_path)
+    # root_path = os.path.abspath(os.path.dirname(__file__)).split('lili')[0]
+    # print(root_path)
 
     # list2 = login.read_xlrd(None)
     #
@@ -274,6 +333,8 @@ if __name__ == '__main__':
 
     # json=requests.get("http://127.0.0.1:5000/get/").json()['proxy']
     # print(json)
+
+    login.writeExcel(login,'4','3')
 
 
 
