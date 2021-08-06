@@ -2,13 +2,11 @@ import os
 import random
 import threading
 import traceback
-from copy import copy
 import datetime
 import xlrd
-import xlwt
-from openpyxl import Workbook
 from selenium import webdriver
 import time
+import encodings.idna
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
@@ -27,7 +25,7 @@ class login:
     # 登录页面
     def loginWebOne(self, ac,school,professional):
 
-        ac = ('15083059097','znzd@123456')
+        # ac = ('15083059097','znzd@123456')
 
 
         print("账号 %s 登陆开始===================================================》" % ac[0])
@@ -215,7 +213,7 @@ class login:
                         useSourceList.append(url.get_attribute("date-resource-id"))
                     # print(url.get_attribute("date-resource-id"))
 
-                print(useSourceList)
+                # print(useSourceList)
 
                 course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id='+random.choice(useSourceList)
 
@@ -341,7 +339,7 @@ class login:
             sheetnames = data.get_sheet_names()
             table = data.get_sheet_by_name(sheetnames[0])
             # table = data.active
-            print(table.title)  # 输出表名
+            # print(table.title)  # 输出表名
             nrows = table.max_row  # 获得行数
             ncolumns = table.max_column  # 获得行数
 

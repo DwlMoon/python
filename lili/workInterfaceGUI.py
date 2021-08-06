@@ -2,6 +2,7 @@ import threading
 import traceback
 from tkinter import *
 from lili import login
+import encodings.idna
 
 
 class Application(Frame):
