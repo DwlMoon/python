@@ -3,7 +3,7 @@ import random
 import threading
 import traceback
 import datetime
-import xlrd
+
 from selenium import webdriver
 import time
 import encodings.idna
@@ -28,7 +28,7 @@ class login:
         # ac = ('15083059097','znzd@123456')
 
 
-        print("账号 %s 登陆开始===================================================》" % ac[0])
+        print("账号: %s 登陆开始======================》" % ac[0])
 
 
         # 笔记本路径
@@ -46,6 +46,8 @@ class login:
 
         myoptions.add_argument("--incognito")
 
+        # myoptions.add_argument('--headless')
+
         myoptions.add_experimental_option("excludeSwitches", ['enable-automation', 'enable-logging'])
 
         # myoptions.add_argument("--proxy-server=http://27.191.60.197:3256")
@@ -58,14 +60,16 @@ class login:
         driver = webdriver.Chrome(
             executable_path=chromedriver,
             options=myoptions)
-        driver.implicitly_wait(10)
-        driver.set_window_size(800, 800)
+        driver.implicitly_wait(15)
+        # driver.set_window_size(800, 800)
+        driver.maximize_window()
 
         try:
             # 发送请求
             driver.get(url)
             time.sleep(4)
 
+            # 登录
             driver.find_element_by_id("loginform-username").send_keys(ac[0])
             time.sleep(2)
 
@@ -76,8 +80,9 @@ class login:
 
             nowurl = driver.current_url
 
+            # 登录成功与否判断
             if nowurl == url:
-                print("账号 %s 登陆失败" % ac[0])
+                print("账号: %s 登陆失败" % ac[0])
                 result_login=login.isElementPresent(self,driver,'xpath','//*[@id="login-form-1"]/div[1]/div[2]/div[2]/p')
 
                 if result_login:
@@ -87,11 +92,11 @@ class login:
                     driver.quit()
 
             else:
-                print("账号 %s 登陆成功" % ac[0])
+                print("账号: %s 登陆成功" % ac[0])
                 time.sleep(2)
 
                 edit=login.isElementPresent(self,driver,'xpath','/html/body/div[4]/div/div/div/div[2]/a')
-                print(edit)
+                # print(edit)
 
                 if edit:
                     driver.find_element_by_xpath('/html/body/div[4]/div/div/div/div[2]/a').click()
@@ -117,6 +122,7 @@ class login:
                         "2001-%s-%s" % (random.choice(month), random.choice(day)))
                     time.sleep(2)
 
+                    # 区分身份
                     name_flag = driver.find_element_by_xpath('//*[@id="userinfo-type"]').get_attribute('value')
                     print("%s 获取的身份为：%s" % (ac,name_flag))
 
@@ -135,7 +141,7 @@ class login:
 
                     if name_flag == "企业用户":
                         driver.find_element_by_id("userinfo-company").send_keys(
-                        random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
+                            random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
                         time.sleep(2)
                         # 设置详细地址
                         driver.find_element_by_id("userinfo-address").send_keys(login.chooseAddress(self))
@@ -197,24 +203,30 @@ class login:
                         time.sleep(3)
 
 
-                    print("账号 %s 登陆结束*****************************************" % ac[0])
+                    print("账号: %s 完善个人信息结束*************************" % ac[0])
 
                 time.sleep(3)
 
+
+                print("账号: %s 浏览资源***************************" % ac[0])
+
+
+                # 进入资源中心，获取资源ID
                 a='http://jinanzyk.36ve.com/ResourceCenter/resource/project-resource-list?projectId=890&page='+str(random.randint(1,500))+'&per-page=15&_pjax=%23new_html&_pjax=%23new_html'
                 driver.get(a)
                 time.sleep(3)
 
                 urls = driver.find_elements_by_xpath("//a")
+                time.sleep(2)
 
                 useSourceList=[]
                 for url in urls:
                     if not (url.get_attribute("date-resource-id") is None):
                         useSourceList.append(url.get_attribute("date-resource-id"))
-                    # print(url.get_attribute("date-resource-id"))
 
                 # print(useSourceList)
 
+                # 利用资源ID打开资源
                 course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id='+random.choice(useSourceList)
 
                 js = 'window.open("{}");'.format(course)
@@ -222,20 +234,22 @@ class login:
                 driver.execute_script(js)
                 time.sleep(5)
 
-                # search_window = driver.current_window_handle
+                # 切换窗口
                 driver.switch_to.window(driver.window_handles[-1])
 
+                # 如果有视频播放按钮，则播放
                 video=login.isElementPresent(self,driver,'xpath','//*[@id="video"]/div/div[9]/canvas')
                 if video:
                     driver.find_element_by_xpath('//*[@id="video"]/div/div[9]/canvas').click()
 
 
         except Exception as e:
-            print("======================%s 账号异常信息===============================" % ac[0])
+            print("======================账号: %s 账号异常信息===============================" % ac[0])
             print(e)
             pass
         finally:
             time.sleep(random.randint(300,480))
+            print("~~~~~~~~~~~~~账号: %s 登录结束，关闭页面~~~~~~~~~~~~~~~~~" % ac[0])
             driver.delete_all_cookies()
             driver.quit()
 
@@ -261,32 +275,30 @@ class login:
         return random.choice(address)
 
 
+    def myreadExcel(self,filePath,school,professional):
+        print(filePath)
+        wb = openpyxl.load_workbook(filePath)
+        # 获取所有工作表名
+        names = wb.sheetnames
+        # wb.get_sheet_by_name(name) 已经废弃,使用wb[name] 获取指定工作表
+        sheet = wb[names[0]]
+        # 获取最大行数
+        maxRow = sheet.max_row
+        # 获取最大列数
+        maxColumn = sheet.max_column
 
-    # 读数据
-    def read_xlrd(excelFile,filePath,school,professional) -> object:
-
-        data = xlrd.open_workbook(filePath)
-
-        print("工作表为：" + str(data.sheet_names()))
-        list = data.sheet_names()
-
-        table = data.sheet_by_name(list[0])
-
-        print("总行数：" + str(table.nrows))
-        print("总列数：" + str(table.ncols))
-        line = int(table.nrows)
+        print("总行数：" + str(maxRow))
+        print("总列数：" + str(maxColumn))
 
         countList = []
 
-        for l in range(1, line):
-            account = str(table.cell(l, 0).value)
-            # pwd = str(table.cell(l, 1).value)
-            # print("第%s行第一列的值为: %s" % (l, account))
-            # need=(account,pwd)
+        for one_column_data in sheet.iter_rows():
+
+            account=one_column_data[0].value
 
             password = 'znzd@123456'
             # password = 'znzd@12'
-            need=(account,password)
+            need = (account, password)
             countList.append(need)
 
         list2 = login.list_split(countList, 5)
@@ -294,18 +306,64 @@ class login:
         count = 1
 
         for i in list2:
+
             for ac in i:
 
                 print("编号 : %s , 账号 : %s" % (count, ac[0]))
 
-                mthread = threading.Thread(target=login.loginWebOne, args=(login, ac,school,professional))
+                mthread = threading.Thread(target=login.loginWebOne, args=(login, ac, school, professional))
                 # 启动刚刚创建的线程
                 mthread.start()
                 count = count + 1
 
-            time.sleep(random.randint(500,600))
+            time.sleep(random.randint(550, 600))
 
 
+
+    # 读数据
+    # def read_xlrd(excelFile,filePath,school,professional) -> object:
+    #
+    #     data = xlrd.open_workbook(filePath)
+    #
+    #     print("工作表为：" + str(data.sheet_names()))
+    #     list = data.sheet_names()
+    #
+    #     table = data.sheet_by_name(list[0])
+    #
+    #     print("总行数：" + str(table.nrows))
+    #     print("总列数：" + str(table.ncols))
+    #     line = int(table.nrows)
+    #
+    #     countList = []
+    #
+    #     for l in range(1, line):
+    #         account = str(table.cell(l, 0).value)
+    #         # pwd = str(table.cell(l, 1).value)
+    #         # print("第%s行第一列的值为: %s" % (l, account))
+    #         # need=(account,pwd)
+    #
+    #         password = 'znzd@123456'
+    #         # password = 'znzd@12'
+    #         need=(account,password)
+    #         countList.append(need)
+    #
+    #     list2 = login.list_split(countList, 5)
+    #
+    #     count = 1
+    #
+    #     for i in list2:
+    #         for ac in i:
+    #
+    #             print("编号 : %s , 账号 : %s" % (count, ac[0]))
+    #
+    #             mthread = threading.Thread(target=login.loginWebOne, args=(login, ac,school,professional))
+    #             # 启动刚刚创建的线程
+    #             mthread.start()
+    #             count = count + 1
+    #
+    #         time.sleep(random.randint(550,600))
+    #
+    #
 
 
 

@@ -37,7 +37,7 @@ class Application(Frame):
 
                 # login.login.read_xlrd(login,myExcel,school,professional)
 
-                t = threading.Thread(target=login.login.read_xlrd, args=(login,myExcel,school,professional))
+                t = threading.Thread(target=login.login.myreadExcel, args=(self,myExcel,school,professional))
                 # 守护线程
                 t.setDaemon(True)
                 # 启动线程
