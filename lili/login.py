@@ -3,6 +3,7 @@ import random
 import threading
 import traceback
 import datetime
+from concurrent.futures import ThreadPoolExecutor
 
 from selenium import webdriver
 import time
@@ -18,17 +19,21 @@ class login:
 
     lock=threading.Lock()
 
+    s1 = threading.Semaphore(5)
+
     # 均分数组
     def list_split(self, n):
         return [self[i:i + n] for i in range(0, len(self), n)]
 
     # 登录页面
-    def loginWebOne(self, ac,school,professional):
+    def loginWebOne(self, ac,school,professional,mynumber):
+
+        self.s1.acquire()
 
         # ac = ('15083059097','znzd@123456')
 
 
-        print("账号: %s 登陆开始======================》" % ac[0])
+        print("编号: %s -> 账号: %s 登陆开始======================》" % (mynumber,ac[0]))
 
 
         # 笔记本路径
@@ -61,8 +66,8 @@ class login:
             executable_path=chromedriver,
             options=myoptions)
         driver.implicitly_wait(15)
-        # driver.set_window_size(800, 800)
-        driver.maximize_window()
+        driver.set_window_size(800, 800)
+        # driver.maximize_window()
 
         try:
             # 发送请求
@@ -88,8 +93,6 @@ class login:
                 if result_login:
                     login.writeExcel(self,ac[0])
                     time.sleep(10)
-                    driver.delete_all_cookies()
-                    driver.quit()
 
             else:
                 print("账号: %s 登陆成功" % ac[0])
@@ -124,7 +127,7 @@ class login:
 
                     # 区分身份
                     name_flag = driver.find_element_by_xpath('//*[@id="userinfo-type"]').get_attribute('value')
-                    print("%s 获取的身份为：%s" % (ac,name_flag))
+                    print("%s 获取的身份为：%s" % (ac[0],name_flag))
 
                     if name_flag == "社会学习者":
                         driver.find_element_by_id("userinfo-company").send_keys(
@@ -226,13 +229,15 @@ class login:
 
                 # print(useSourceList)
 
+                time.sleep(2)
+
                 # 利用资源ID打开资源
                 course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id='+random.choice(useSourceList)
 
                 js = 'window.open("{}");'.format(course)
 
                 driver.execute_script(js)
-                time.sleep(5)
+                time.sleep(4)
 
                 # 切换窗口
                 driver.switch_to.window(driver.window_handles[-1])
@@ -249,9 +254,11 @@ class login:
             pass
         finally:
             time.sleep(random.randint(300,480))
+            # time.sleep(random.randint(20,40))
             print("~~~~~~~~~~~~~账号: %s 登录结束，关闭页面~~~~~~~~~~~~~~~~~" % ac[0])
             driver.delete_all_cookies()
             driver.quit()
+            self.s1.release()
 
 
     """
@@ -301,22 +308,43 @@ class login:
             need = (account, password)
             countList.append(need)
 
-        list2 = login.list_split(countList, 5)
+        # list2 = login.list_split(countList, 5)
 
         count = 1
 
-        for i in list2:
+        # 设置线程池
+        # mypool=ThreadPoolExecutor(max_workers=5)
 
-            for ac in i:
+        # for i in list2:
+        #
+        #     for ac in i:
+        #
+        #         # print("编号 : %s , 账号 : %s" % (count, ac[0]))
+        #
+        #         mthread = threading.Thread(target=login.loginWebOne, args=(login, ac, school, professional))
+        #         # mypool.submit(login.loginWebOne,ac, school, professional)
+        #         # 启动刚刚创建的线程
+        #         mthread.start()
+        #
+        #         count = count + 1
+        #
+        #     # time.sleep(random.randint(550, 600))
 
-                print("编号 : %s , 账号 : %s" % (count, ac[0]))
 
-                mthread = threading.Thread(target=login.loginWebOne, args=(login, ac, school, professional))
-                # 启动刚刚创建的线程
-                mthread.start()
-                count = count + 1
 
-            time.sleep(random.randint(550, 600))
+        for i in countList:
+
+
+                # print("编号 : %s , 账号 : %s" % (count, ac[0]))
+
+            mthread = threading.Thread(target=login.loginWebOne, args=(login, i, school, professional,count))
+            # mypool.submit(login.loginWebOne,ac, school, professional)
+            # 启动刚刚创建的线程
+            mthread.start()
+
+            count = count + 1
+
+            # time.sleep(random.randint(550, 600))
 
 
 
