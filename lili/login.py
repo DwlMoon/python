@@ -13,13 +13,14 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.select import Select
 import openpyxl
+import re
 
 
 class login:
 
     lock=threading.Lock()
 
-    s1 = threading.Semaphore(5)
+    s1 = threading.Semaphore(10)
 
     # 均分数组
     def list_split(self, n):
@@ -30,7 +31,7 @@ class login:
 
         self.s1.acquire()
 
-        # ac = ('15083059097','znzd@123456')
+        # ac = ('18340095606','znzd@123456')
 
 
         print("编号: %s -> 账号: %s 登陆开始======================》" % (mynumber,ac[0]))
@@ -109,9 +110,11 @@ class login:
                     time.sleep(2)
 
                     # 设置名字
-                    name = driver.find_element_by_id("userinfo-pet_name").get_attribute('value')
+                    name = driver.find_element_by_id("userinfo-pet_name").get_attribute('value').strip()
                     print("获取的名字为：%s" % name)
-                    if name == '' or name is None:
+                    if name is None:
+                        driver.find_element_by_id("userinfo-pet_name").clear()
+                        time.sleep(1)
                         driver.find_element_by_id("userinfo-pet_name").send_keys(
                             random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
                     time.sleep(2)
@@ -205,14 +208,38 @@ class login:
                         driver.find_element_by_xpath('//*[@id="form-1"]/div[20]/button').click()
                         time.sleep(3)
 
+                print("账号: %s 完善个人信息结束*************************" % ac[0])
 
-                    print("账号: %s 完善个人信息结束*************************" % ac[0])
+
+
+                # 修改错误的姓名
+                lala=login.isElementPresent(self,driver,'xpath','/html/body/div[2]/div/div[1]/div/div/p[2]')
+
+                if lala:
+                    print("账号: %s 修改名字***************************" % ac[0])
+                    name=driver.find_element_by_xpath('/html/body/div[2]/div/div[1]/div/div/p[2]').text
+                    print(name)
+                    a=login.check_contain_chinese(name)
+                    print(a)
+                    if a:
+                        new_name=re.sub("[A-Za-z0-9\!\%\[\]\,\。]","",name)
+                        print(new_name)
+                        driver.find_element_by_xpath('/html/body/div[2]/div/div[1]/ul/li[1]/a').click()
+                        time.sleep(2)
+                        driver.find_element_by_xpath('//*[@id="edit_info"]').click()
+                        time.sleep(2)
+                        driver.find_element_by_id("userinfo-pet_name").clear()
+                        time.sleep(1)
+                        driver.find_element_by_id("userinfo-pet_name").send_keys(new_name)
+                        time.sleep(1)
+                        driver.find_element_by_xpath('//*[@id="form-1"]/div[14]/button').click()
+                        time.sleep(2)
 
                 time.sleep(3)
 
 
-                print("账号: %s 浏览资源***************************" % ac[0])
 
+                print("账号: %s 浏览资源***************************" % ac[0])
 
                 # 进入资源中心，获取资源ID
                 a='http://jinanzyk.36ve.com/ResourceCenter/resource/project-resource-list?projectId=890&page='+str(random.randint(1,500))+'&per-page=15&_pjax=%23new_html&_pjax=%23new_html'
@@ -253,12 +280,20 @@ class login:
             print(e)
             pass
         finally:
-            time.sleep(random.randint(300,480))
+            time.sleep(random.randint(300,360))
             # time.sleep(random.randint(20,40))
             print("~~~~~~~~~~~~~账号: %s 登录结束，关闭页面~~~~~~~~~~~~~~~~~" % ac[0])
             driver.delete_all_cookies()
             driver.quit()
             self.s1.release()
+
+
+    # 检查是否有汉字
+    def check_contain_chinese(check_str):
+        for ch in check_str.encode('utf-8').decode('utf-8'):
+            if u'\u4e00' <= ch <= u'\u9fff':
+                return True
+        return False
 
 
     """
@@ -308,34 +343,9 @@ class login:
             need = (account, password)
             countList.append(need)
 
-        # list2 = login.list_split(countList, 5)
-
         count = 1
 
-        # 设置线程池
-        # mypool=ThreadPoolExecutor(max_workers=5)
-
-        # for i in list2:
-        #
-        #     for ac in i:
-        #
-        #         # print("编号 : %s , 账号 : %s" % (count, ac[0]))
-        #
-        #         mthread = threading.Thread(target=login.loginWebOne, args=(login, ac, school, professional))
-        #         # mypool.submit(login.loginWebOne,ac, school, professional)
-        #         # 启动刚刚创建的线程
-        #         mthread.start()
-        #
-        #         count = count + 1
-        #
-        #     # time.sleep(random.randint(550, 600))
-
-
-
         for i in countList:
-
-
-                # print("编号 : %s , 账号 : %s" % (count, ac[0]))
 
             mthread = threading.Thread(target=login.loginWebOne, args=(login, i, school, professional,count))
             # mypool.submit(login.loginWebOne,ac, school, professional)
@@ -346,52 +356,6 @@ class login:
 
             # time.sleep(random.randint(550, 600))
 
-
-
-    # 读数据
-    # def read_xlrd(excelFile,filePath,school,professional) -> object:
-    #
-    #     data = xlrd.open_workbook(filePath)
-    #
-    #     print("工作表为：" + str(data.sheet_names()))
-    #     list = data.sheet_names()
-    #
-    #     table = data.sheet_by_name(list[0])
-    #
-    #     print("总行数：" + str(table.nrows))
-    #     print("总列数：" + str(table.ncols))
-    #     line = int(table.nrows)
-    #
-    #     countList = []
-    #
-    #     for l in range(1, line):
-    #         account = str(table.cell(l, 0).value)
-    #         # pwd = str(table.cell(l, 1).value)
-    #         # print("第%s行第一列的值为: %s" % (l, account))
-    #         # need=(account,pwd)
-    #
-    #         password = 'znzd@123456'
-    #         # password = 'znzd@12'
-    #         need=(account,password)
-    #         countList.append(need)
-    #
-    #     list2 = login.list_split(countList, 5)
-    #
-    #     count = 1
-    #
-    #     for i in list2:
-    #         for ac in i:
-    #
-    #             print("编号 : %s , 账号 : %s" % (count, ac[0]))
-    #
-    #             mthread = threading.Thread(target=login.loginWebOne, args=(login, ac,school,professional))
-    #             # 启动刚刚创建的线程
-    #             mthread.start()
-    #             count = count + 1
-    #
-    #         time.sleep(random.randint(550,600))
-    #
-    #
 
 
 
@@ -448,27 +412,7 @@ class login:
 
 if __name__ == '__main__':
 
-    # root_path = os.path.abspath(os.path.dirname(__file__)).split('lili')[0]
-    # print(root_path)
 
-    # list2 = login.read_xlrd(None)
-    #
-    # count = 1
-    #
-    # for i in list2:
-    #     for ac in i:
-    #         print("编号 : %s , 账号 : %s" % (count, ac))
-    #
-    #         mthread = threading.Thread(target=login.loginWebOne, args=(login, ac))
-    #         # 启动刚刚创建的线程
-    #         mthread.start()
-    #         count = count + 1
-    #
-    #     time.sleep(60)
-    #
-    # print("账号全部结束，数量为 : %s" % count)
-
-    # login.loginWebOne(login,None)
 
 
 
@@ -476,7 +420,7 @@ if __name__ == '__main__':
     # print(json)
 
     # login.writeExcel(login,'4','3')
-    login.loginWebOne(login,None,None,None)
+    login.loginWebOne(login,None,None,None,1)
 
 
 
