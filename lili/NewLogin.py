@@ -99,14 +99,13 @@ class login:
                 print("账号: %s 登陆成功" % ac[0])
                 time.sleep(2)
 
-                edit=login.isElementPresent(self,driver,'xpath','/html/body/div[4]/div/div/div/div[2]/a')
-                # print(edit)
+                # edit=login.isElementPresent(self,driver,'xpath','/html/body/div[4]/div/div/div/div[2]/a')
 
                 # 判断是否需要个人完善信息
-                if edit:
-                    login.PerfectInformation(self,driver,ac,school,professional,mynumber)
+                # if edit:
+                #     login.PerfectInformation(self,driver,ac,school,professional,mynumber)
 
-                time.sleep(1)
+                # time.sleep(1)
                 print("账号: %s 浏览资源***************************" % ac[0])
                 login.BrowseTheResources(self, driver)
 
@@ -315,7 +314,7 @@ class login:
                     time.sleep(stoptime)
 
                 # ppt 类型
-                elif '.pptx' in dataType:
+                elif '.pptx' in dataType or '.ppt' in dataType or '.pdf' in dataType:
                     # 获取其中的iframe
                     myiframe = driver.find_elements_by_tag_name('iframe')[0]
                     driver.switch_to.frame(myiframe)
