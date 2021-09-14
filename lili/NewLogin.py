@@ -11,10 +11,11 @@ import encodings.idna
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.remote import webelement
 from selenium.webdriver.support.select import Select
 import openpyxl
 
-
+#用于个人登陆
 class login:
 
     lock=threading.Lock()
@@ -30,7 +31,7 @@ class login:
 
         # self.s1.acquire()
 
-        ac = ('15083059097','znzd@123456')
+        ac = ('15288846412','haha1688')
 
 
         print("编号: %s -> 账号: %s 登陆开始======================》" % (mynumber,ac[0]))
@@ -65,7 +66,7 @@ class login:
         driver = webdriver.Chrome(
             executable_path=chromedriver,
             options=myoptions)
-        driver.implicitly_wait(15)
+        driver.implicitly_wait(20)
         driver.set_window_size(800, 800)
         # driver.maximize_window()
 
@@ -208,106 +209,133 @@ class login:
 
                     print("账号: %s 完善个人信息结束*************************" % ac[0])
 
-                time.sleep(3)
-
-
+                time.sleep(1)
                 print("账号: %s 浏览资源***************************" % ac[0])
 
 
-                # 进入资源中心，获取资源ID
-                a='http://jinanzyk.36ve.com/ResourceCenter/resource/project-resource-list?projectId=890&page='+str(random.randint(1,500))+'&per-page=15&_pjax=%23new_html&_pjax=%23new_html'
-                driver.get(a)
-                time.sleep(3)
+                # 进入资源中心，获取资源ID(按路径查找)
+                # a='http://jinanzyk.36ve.com/ResourceCenter/resource/project-resource-list?projectId=890&page='+str(random.randint(1,500))+'&per-page=15&_pjax=%23new_html&_pjax=%23new_html'
+                # driver.get(a)
+                # time.sleep(3)
+                # urls = driver.find_elements_by_xpath("//a")
+                # time.sleep(2)
+                # useSourceList=[]
+                # for url in urls:
+                #     if not (url.get_attribute("date-resource-id") is None):
+                #         useSourceList.append(url.get_attribute("date-resource-id"))
+                # time.sleep(2)
 
-                urls = driver.find_elements_by_xpath("//a")
-                time.sleep(2)
 
-                useSourceList=[]
-                for url in urls:
-                    if not (url.get_attribute("date-resource-id") is None):
-                        useSourceList.append(url.get_attribute("date-resource-id"))
-
-                # print(useSourceList)
-
-                time.sleep(2)
-
+                # 进入资源中心，获取资源ID(按点击事件查找)
+                driver.find_element_by_xpath('//*[@id="bs-example-navbar-collapse-1"]/ul/li[4]/a').click()
+                time.sleep(1)
 
                 while True:
 
-                    # 利用资源ID打开资源
+                    # 利用资源ID打开资源(按路径查找)（方法一）
                     # course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id='+random.choice(useSourceList)
-                    course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id=4226bd1d-0552-3d93-9c2b-f44711da15b5'
+                    # course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id=69c89e5e-7934-3360-bbb6-f688fc8485b7'
+                    # js = 'window.open("{}");'.format(course)
+                    # driver.execute_script(js)
 
-                    js = 'window.open("{}");'.format(course)
-
-                    driver.execute_script(js)
-                    time.sleep(4)
-
-                    # 切换窗口
-                    driver.switch_to.window(driver.window_handles[-1])
+                    # 进入资源中心，获取资源ID(按点击事件查找)（方法二）
+                    #挑选页数
+                    driver.find_element_by_xpath('//*[@id="new_html"]/div/div[3]/div[1]/div[3]/ul/div/input').clear()
+                    time.sleep(1)
+                    driver.find_element_by_xpath('//*[@id="new_html"]/div/div[3]/div[1]/div[3]/ul/div/input').send_keys(str(random.randint(1, 600)))
+                    time.sleep(1)
+                    driver.find_element_by_xpath('//*[@id="courseUrl"]/span').click()
                     time.sleep(2)
 
-                    dataType=driver.find_element_by_xpath('/html/body/div[1]/div/div[1]/h3').text
-                    print(dataType)
+                    resourceList = [i for i in range(1, 16)]
+                    for i in range(random.randint(5,10)):
 
-                    if '.mp4' in dataType:
-                        #视频类型
+                        #挑选资源
+                        begin = '//*[@id="new_html"]/div/div[3]/div[1]/div[2]/div['
+                        end = ']/div/div/div[2]/h4/a'
+                        #随机获取资源
+                        number=random.choice(resourceList)
+                        use = begin + str(number) + end
+                        #移除资源，防止短时间内两次点击
+                        resourceList.remove(number)
 
-                        needtime=driver.find_element_by_xpath('//*[@id="video"]/div/div[2]/div[8]').text
-                        need = needtime.split('/')[1].strip().split(':')
-                        needsecond = int(need[0]) * 60 + int(need[1])
+                        driver.find_element_by_xpath(use).click()
+                        time.sleep(2)
+
+
+                        # 切换窗口
+                        driver.switch_to.window(driver.window_handles[-1])
                         time.sleep(1)
 
-                        driver.find_element_by_xpath('//*[@id="video"]/div/div[9]/canvas').click()
-                        time.sleep(needsecond+random.randint(5,10))
+                        #获取资源类型（视频、PPT、word文档、JPG）
+                        dataType=driver.find_element_by_xpath('/html/body/div[1]/div/div[1]/h3').text
+                        print(dataType)
+                        time.sleep(3)
 
-                    if '.pptx' in dataType:
-                        #ppt 类型
+                        # 视频类型
+                        if '.mp4' in dataType or '.avi' in dataType:
+                            # 获取视频时长
+                            needtime=driver.find_element_by_xpath('//*[@id="video"]/div/div[2]/div[8]').text
+                            need = needtime.split('/')[1].strip().split(':')
+                            needsecond = int(need[0]) * 60 + int(need[1])
+                            time.sleep(1)
 
-                        myiframe=driver.find_elements_by_tag_name('iframe')[0]
-                        driver.switch_to.frame(myiframe)
+                            driver.find_element_by_xpath('//*[@id="video"]/div/div[9]/canvas').click()
+                            stoptime=needsecond+random.randint(5,10)
+                            print("视频停留时长为 : %s" % stoptime)
+                            time.sleep(stoptime)
 
-                        pagecount=0
-                        countexit=login.isElementPresent(self,driver,'id','PageCount')
-                        if countexit:
-                            pagecount=driver.find_element_by_id('PageCount').text
+                        # ppt 类型
+                        elif '.pptx' in dataType:
+                            # 获取其中的iframe
+                            myiframe=driver.find_elements_by_tag_name('iframe')[0]
+                            driver.switch_to.frame(myiframe)
 
-                        print(pagecount)
-                        driver.switch_to.default_content()
+                            countexit=login.isElementPresent(self,driver,'id','PageCount')
+                            if countexit:
+                                # 获取ppt页数
+                                pagecount=driver.find_element_by_id('PageCount').text
 
-                        for i in range(int(pagecount)*5):
-                            myiframe.click()
-                            time.sleep(random.randint(1,3))
+                                print("PPT 页数为 : %s"%pagecount)
+                                driver.switch_to.default_content()
+
+                                for i in range(int(pagecount)*4):
+                                    myiframe.click()
+                                    time.sleep(random.randint(2,4))
+
+                        # 文档类型
+                        elif '.docx' in dataType or '.doc' in dataType:
+
+                            myiframe = driver.find_elements_by_tag_name('iframe')[0]
+                            driver.switch_to.frame(myiframe)
+                            result=login.isElementPresent(self,driver,'id','ctn')
+                            if result:
+
+                                haha=login.isElementPresent(self,driver,'id','pageCount')
+
+                                if haha:
+                                    # 获取总页数
+                                    needCount=int(driver.find_element_by_id('pageCount').text)
+                                    print("获取数量: %s" % needCount)
+
+                                    # jsPrint='var allPage=document.querySelectorAll("#ctn>div");return allPage;'
+                                    # bodyHeight=driver.execute_script(jsPrint)
+                                    # time.sleep(1)
+                                    # print("窗口高度3: %s" % scroll)
+
+                                    for i in range(0,needCount*1182,150):
+                                        # 下滑操作
+                                        jsDown = "var q=document.getElementById('ctn').scrollTop="+str(i)
+                                        driver.execute_script(jsDown)
+                                        time.sleep(1)
+
+                        else:
+                            time.sleep(random.randint(180,240))
 
 
-
-                    if '.jpg' in dataType:
-                        print("图片")
-
-
-
-
-
-                    # 视频播放
-                    # video=login.isElementPresent(self,driver,'xpath','//*[@id="video"]/div/div[9]/canvas')
-                    # if video:
-                    #     driver.find_element_by_xpath('//*[@id="video"]/div/div[9]/canvas').click()
-
-                    # PPT播放
-
-                    # js = 'document.getElementById("userinfo-major_name").removeAttribute("readonly")'
-
-                    # pageCount = driver.find_element_by_xpath('//*[@id="PageCount"]').get_attribute("value")
-                    # print(pageCount)
-                    # ppt=login.isElementPresent(self,driver,"xpath", '//*[@id="bottom"]/div[1]/div[3]')
-                    # ppt=login.isElementPresent(self,driver,"id", 'pageNext')
-
-
-
-                    time.sleep(600)
-                    driver.close()
-                    driver.switch_to.window(driver.window_handles[-1])
-                    time.sleep(2)
+                        driver.close()
+                        driver.switch_to.window(driver.window_handles[-1])
+                        time.sleep(2)
 
 
         except Exception as e:
@@ -516,7 +544,7 @@ if __name__ == '__main__':
     # need=mytext.split('/')[1].strip().split(':')
     # print(need)
     # needsecond=int(need[0])*60+int(need[1])
-    # print(needsecond)
+    # print(700/100)
 
 
 
