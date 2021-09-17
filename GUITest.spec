@@ -45,10 +45,10 @@ exe = EXE(pyz,
           a.datas,
           [],
           exclude_binaries=False,
-          name='login',
+          name='Browse',
           debug=False,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
           console=True,
-          icon='D:/dwl/python/pythonProject/123.ico')
+          icon='D:/dwl/python/pythonProject/789.ico')

@@ -16,7 +16,7 @@ from selenium.webdriver.support.select import Select
 import openpyxl
 
 #用于个人登陆
-class login:
+class newlogin:
 
     lock=threading.Lock()
 
@@ -31,10 +31,10 @@ class login:
 
         # self.s1.acquire()
 
-        ac = ('15288846412','haha1688')
+        # ac = ('15288846412','haha1688')
 
 
-        print("编号: %s -> 账号: %s 登陆开始======================》" % (mynumber,ac[0]))
+        print("账号: %s 登陆开始======================》" % (ac[0]))
 
 
         # 笔记本路径
@@ -89,10 +89,10 @@ class login:
             # 登录成功与否判断
             if nowurl == url:
                 print("账号: %s 登陆失败" % ac[0])
-                result_login=login.isElementPresent(self,driver,'xpath','//*[@id="login-form-1"]/div[1]/div[2]/div[2]/p')
+                result_login=newlogin.isElementPresent(self,driver,'xpath','//*[@id="login-form-1"]/div[1]/div[2]/div[2]/p')
 
                 if result_login:
-                    login.writeExcel(self,ac[0])
+                    newlogin.writeExcel(self,ac[0])
                     time.sleep(10)
 
             else:
@@ -107,7 +107,7 @@ class login:
 
                 # time.sleep(1)
                 print("账号: %s 浏览资源***************************" % ac[0])
-                login.BrowseTheResources(self, driver)
+                newlogin.BrowseTheResources(self, driver)
 
 
         except Exception as e:
@@ -165,7 +165,7 @@ class login:
                 random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
             time.sleep(2)
             # 设置详细地址
-            driver.find_element_by_id("userinfo-address").send_keys(login.chooseAddress(self))
+            driver.find_element_by_id("userinfo-address").send_keys(newlogin.chooseAddress(self))
             time.sleep(2)
 
             driver.find_element_by_xpath('//*[@id="form-1"]/div[14]/button').click()
@@ -175,7 +175,7 @@ class login:
                 random.sample('zyxwvutsrqponmlkjihgfedcba', 5))
             time.sleep(2)
             # 设置详细地址
-            driver.find_element_by_id("userinfo-address").send_keys(login.chooseAddress(self))
+            driver.find_element_by_id("userinfo-address").send_keys(newlogin.chooseAddress(self))
             time.sleep(2)
 
             driver.find_element_by_xpath('//*[@id="form-1"]/div[14]/button').click()
@@ -227,7 +227,7 @@ class login:
             time.sleep(2)
 
             # 设置详细地址
-            driver.find_element_by_id("userinfo-address").send_keys(login.chooseAddress(self))
+            driver.find_element_by_id("userinfo-address").send_keys(newlogin.chooseAddress(self))
             time.sleep(2)
 
             driver.find_element_by_xpath('//*[@id="form-1"]/div[20]/button').click()
@@ -258,8 +258,9 @@ class login:
         # 进入资源中心，获取资源ID(按点击事件查找)
         driver.find_element_by_xpath('//*[@id="bs-example-navbar-collapse-1"]/ul/li[4]/a').click()
         time.sleep(1)
-
+        count=1
         while True:
+            print("*************** 第 %s 个资源 ****************",count)
 
             # 利用资源ID打开资源(按路径查找)（方法一）
             # course='http://jinanzyk.36ve.com/ResourceCenter/resource/show-resource?resource_id='+random.choice(useSourceList)
@@ -319,7 +320,7 @@ class login:
                     myiframe = driver.find_elements_by_tag_name('iframe')[0]
                     driver.switch_to.frame(myiframe)
 
-                    countexit = login.isElementPresent(self, driver, 'id', 'PageCount')
+                    countexit = newlogin.isElementPresent(self, driver, 'id', 'PageCount')
                     if countexit:
                         # 获取ppt页数
                         pagecount = driver.find_element_by_id('PageCount').text
@@ -336,10 +337,10 @@ class login:
 
                     myiframe = driver.find_elements_by_tag_name('iframe')[0]
                     driver.switch_to.frame(myiframe)
-                    result = login.isElementPresent(self, driver, 'id', 'ctn')
+                    result = newlogin.isElementPresent(self, driver, 'id', 'ctn')
                     if result:
 
-                        haha = login.isElementPresent(self, driver, 'id', 'pageCount')
+                        haha = newlogin.isElementPresent(self, driver, 'id', 'pageCount')
 
                         if haha:
                             # 获取总页数
@@ -360,6 +361,7 @@ class login:
                 else:
                     time.sleep(random.randint(60, 120))
 
+                count+=1
                 # 关闭窗口
                 driver.close()
                 driver.switch_to.window(driver.window_handles[-1])
@@ -443,7 +445,7 @@ class login:
 
                 # print("编号 : %s , 账号 : %s" % (count, ac[0]))
 
-            mthread = threading.Thread(target=login.loginWebOne, args=(login, i, school, professional,count))
+            mthread = threading.Thread(target=newlogin.loginWebOne, args=(newlogin, i, school, professional,count))
             # mypool.submit(login.loginWebOne,ac, school, professional)
             # 启动刚刚创建的线程
             mthread.start()
@@ -555,7 +557,7 @@ class login:
 if __name__ == '__main__':
 
 
-    login.loginWebOne(login,None,None,None,1)
+    newlogin.loginWebOne(newlogin,None,None,None,1)
     # mytext='00:00 / 04:07'
     # need=mytext.split('/')[1].strip().split(':')
     # print(need)

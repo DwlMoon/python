@@ -1,7 +1,7 @@
 import threading
 import traceback
 from tkinter import *
-from lili import login
+from lili import login, NewLogin
 import encodings.idna
 
 
@@ -13,31 +13,46 @@ class Application(Frame):
             self.createWidgets()
 
         def createWidgets(self):
-            account_name = Label(self, text="Excel路径 :")
-            account_name.pack()
-            self.myExcel = Entry(self, bd=5, width=40)
-            self.myExcel.pack()
-            pass_name = Label(self, text="学校 :")
-            pass_name.pack()
-            self.school = Entry(self, bd=5, width=40)
-            self.school.pack()
-            pass_name = Label(self, text="专业 :")
-            pass_name.pack()
-            self.professional = Entry(self, bd=5, width=40)
-            self.professional.pack()
+            # account_name = Label(self, text="Excel路径 :")
+            # account_name.pack()
+            # self.myExcel = Entry(self, bd=5, width=40)
+            # self.myExcel.pack()
+            account = Label(self, text="账号 :")
+            account.pack()
+            self.myAccount = Entry(self, bd=5, width=40)
+            self.myAccount.pack()
+            account_pass = Label(self, text="密码 :")
+            account_pass.pack()
+            self.password = Entry(self, bd=5, width=40)
+            self.password.pack()
+            # pass_name = Label(self, text="学校 :")
+            # pass_name.pack()
+            # self.school = Entry(self, bd=5, width=40)
+            # self.school.pack()
+            # pass_name = Label(self, text="专业 :")
+            # pass_name.pack()
+            # self.professional = Entry(self, bd=5, width=40)
+            # self.professional.pack()
             self.alertButton = Button(self, text='开始登陆', command=self.hello, width=15)
             self.alertButton.pack()
 
         def hello(self):
 
-                myExcel = self.myExcel.get()
+                # myExcel = self.myExcel.get()
                 # myExcel = 'D:\lili.xlsx'
-                school = self.school.get()
-                professional = self.professional.get()
+                # school = self.school.get()
+                # professional = self.professional.get()
+                myAccount = self.myAccount.get()
+                password = self.password.get()
+                ac=[]
+                ac.append(myAccount)
+                ac.append(password)
+
 
                 # login.login.read_xlrd(login,myExcel,school,professional)
 
-                t = threading.Thread(target=login.login.myreadExcel, args=(self,myExcel,school,professional))
+                # t = threading.Thread(target=login.login.myreadExcel, args=(self,myExcel,school,professional))
+                t = threading.Thread(target=NewLogin.newlogin.loginWebOne, args=(self,ac,None,None,1))
                 # 守护线程
                 t.setDaemon(True)
                 # 启动线程
@@ -59,6 +74,8 @@ app = Application()
 # 设置窗口标题:
 app.master.title('Login')
 app.master.geometry('400x250')
+app.configure(bg='blue')
+app.master.configure(bg='blue')
 # logo = PhotoImage(file='E:/pythonProject/work/Ironman.gif')
 # Label(app.master,compound=CENTER,image=logo).pack(side="left")
 
